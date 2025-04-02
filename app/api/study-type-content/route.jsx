@@ -4,11 +4,13 @@ import { inngest } from "@/inngest/client";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
-    const {chapters,courseId,type}=await req.json();
+    const {chapters,courseId,type,courseLength}=await req.json();
 
-    const PROMPT=(type=='Flashcard')?
-     'Generate the flashcard on topic : '+chapters+' in JSON format with front back content, Maximum 15'
-     :'Generate Quiz on topic : '+chapters+' with Question and Options along with correct answer in JSON format, (Max 10)'
+  const PROMPT = type === 'Flashcard' 
+      ? 'Generate the flashcard on topic : '+chapters+' in JSON format with front back content, Maximum '+courseLength+' multiplied by 3'
+      : type === 'Quiz'
+          ? 'Generate Quiz on topic : '+chapters+' with Question and Options along with correct answer in JSON format, (Max '+courseLength+' multiplied by 3)'
+          : 'Generate MindMap on topic : '+chapters+' with Topic and Subtopics in JSON format, (Max '+courseLength+' multiplied by 3)';
 
     //Insert Record to DB , Update status to Generating...
     const result=await db.insert(STUDY_TYPE_CONTENT_TABLE).values({

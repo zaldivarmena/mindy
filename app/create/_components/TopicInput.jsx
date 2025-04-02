@@ -9,7 +9,7 @@ import {
   } from "@/components/ui/select"
 
   
-function TopicInput({setTopic,setDifficultyLevel}) {
+function TopicInput({setTopic, setDifficultyLevel, setCourseLength}) {
   return (
     <div className='mt-10 w-full flex flex-col'>
         <h2>Enter topic or paster the content for which you want to generate study material</h2>
@@ -26,8 +26,19 @@ function TopicInput({setTopic,setDifficultyLevel}) {
                 <SelectItem value="Moderate">Moderate</SelectItem>
                 <SelectItem value="Hard">Hard</SelectItem>
             </SelectContent>
-            </Select>
-
+        </Select>
+        
+        <h2 className='mt-5 mb-3'>Select the course length</h2>
+        <Select onValueChange={(value)=>setCourseLength(value)}>
+            <SelectTrigger className="w-full">
+                <SelectValue placeholder="Course Length" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="Short">Short (1-3 chapters)</SelectItem>
+                <SelectItem value="Medium">Medium (3-5 chapters)</SelectItem>
+                <SelectItem value="Long">Long (6+ chapters)</SelectItem>
+            </SelectContent>
+        </Select>
     </div>
   )
 }

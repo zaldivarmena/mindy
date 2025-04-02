@@ -9,6 +9,8 @@ import { useUser } from '@clerk/nextjs';
 import { Loader } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import Image from 'next/image';
+import Link from 'next/link';
 function Create() {
     const [step,setStep]=useState(0);
     const [formData,setFormData]=useState([]);
@@ -49,6 +51,15 @@ function Create() {
 
   return (
     <div className='flex flex-col items-center p-5 md:px-24 lg:px-36 mt-20'>
+        <Link href="/dashboard">
+          <Image
+            src={'/logo.svg'} 
+            alt='logo' 
+            width={150} 
+            height={50} 
+            className="mx-auto"
+          />
+        </Link>
         <h2 className='font-bold text-4xl text-primary'>Start Building Your Personal Study Material</h2>
         <p className='text-gray-500 text-lg'>Fill All details in order to generate study material for your next project</p>
 
@@ -57,6 +68,7 @@ function Create() {
           : <TopicInput 
           setTopic={(value)=>handleUserInput('topic',value)} 
           setDifficultyLevel={(value)=>handleUserInput('difficultyLevel',value)}
+          setCourseLength={(value)=>handleUserInput('courseLength',value)}
           /> }
         </div>
 

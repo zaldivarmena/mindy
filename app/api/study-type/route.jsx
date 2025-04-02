@@ -21,7 +21,7 @@ export async function POST(req) {
             notes:notes,
             flashcard:contentList?.filter(item=>item.type=='Flashcard'),
             quiz:contentList?.filter(item=>item.type=='Quiz'),
-            qa:contentList?.filter(item=>item.type=='QA'),
+            mindmap:contentList?.filter(item=>item.type=='MindMap'),
         }
         return NextResponse.json(result);
     }
