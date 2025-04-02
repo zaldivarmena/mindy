@@ -14,10 +14,8 @@ function DashboardHeader() {
         <Link href={'/dashboard'}>
            <div className='flex gap-2 items-center'>
             
-             <Image src={'/logo.svg'} alt='logo' width={30} height={30}/>
-            
-                <h2 className="font-bold text-xl">Easy Study</h2>
-          </div>
+            <Image src={'/logo.svg'} alt='logo' width={120} height={40}/>
+         </div>
           </Link>  }
 
         {/* Dashboard Button added */}

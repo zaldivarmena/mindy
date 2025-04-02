@@ -27,8 +27,7 @@ function Upgrade() {
 
   const OnCheckoutClick=async()=>{
     const result=await axios.post('/api/payment/checkout',{
-      priceId:process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY
-    });
+      priceId:process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY});
 
     console.log(result.data);
     window.open(result.data?.url)
@@ -44,187 +43,208 @@ function Upgrade() {
 
   }
   return (
-    <div>
-    <h2 className='font-medium text-3xl'>Plans</h2>
-    <p>Update your plan to generate unlimted courses for your exam</p>
+    <div className="px-4 py-8 relative z-0">
+      <h2 className='font-medium text-3xl mb-2'>Plans</h2>
+      <p className="text-muted-foreground mb-8">Update your plan to generate unlimited courses for your exam</p>
   
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-center md:gap-8">
+      <div className="mx-auto max-w-5xl relative z-0">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 relative z-0">
+          {/* Free Plan */}
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm relative flex flex-col h-full">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-card-foreground">
+                  Free
+                </h2>
+                <div className="text-sm px-3 py-1 rounded-full bg-secondary text-secondary-foreground">For individuals</div>
+              </div>
 
+              <div className="flex items-baseline mb-6">
+                <span className="text-4xl font-bold text-card-foreground">$0</span>
+                <span className="ml-1 text-sm text-muted-foreground">Forever</span>
+              </div>
+            </div>
 
-  <div className="rounded-2xl border border-gray-200 p-6 shadow-sm sm:px-8 lg:p-12">
-    <div className="text-center">
-      <h2 className="text-lg font-medium text-gray-900">
-        Free
-        <span className="sr-only">Plan</span>
-      </h2>
+            <ul className="space-y-3 mb-8 flex-grow">
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">2 Course Generation</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Limited Support</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Email support</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Help center access</span>
+              </li>
+            </ul>
 
-      <p className="mt-2 sm:mt-4">
-        <strong className="text-3xl font-bold text-gray-900 sm:text-4xl"> 0$ </strong>
+            {userDetail?.isMember === false ? (
+              <Button 
+                variant="outline" 
+                onClick={onPaymentMange} 
+                className="w-full"
+              >
+                Manage Plan
+              </Button>
+            ) : (
+              <Button
+                onClick={OnCheckoutClick}
+                variant="outline"
+                className="w-full"
+              >
+                Downgrade
+              </Button>
+            )}
+          </div>
 
-        <span className="text-sm font-medium text-gray-700">/month</span>
-      </p>
+          {/* Premium Plan */}
+          <div className="rounded-2xl border border-primary bg-card p-8 shadow-md relative flex flex-col h-full">
+            <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full">Popular</div>
+            
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-card-foreground">
+                  Mindy+
+                </h2>
+                <div className="text-sm px-3 py-1 rounded-full bg-secondary text-secondary-foreground">For individuals</div>
+              </div>
+
+              <div className="flex items-baseline mb-6">
+                <span className="text-4xl font-bold text-card-foreground">$10</span>
+                <span className="ml-1 text-sm text-muted-foreground">month</span>
+              </div>
+            </div>
+
+            <ul className="space-y-3 mb-8 flex-grow">
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Unlimited Courses</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Unlimited Flashcards & Quizzes</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Email support</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Help center access</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-5 text-primary"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span className="text-card-foreground">Priority customer service</span>
+              </li>
+            </ul>
+
+            {userDetail?.isMember === false ? (
+              <Button
+                onClick={OnCheckoutClick}
+                className="w-full"
+              >
+                Get started
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={onPaymentMange} 
+                className="w-full"
+              >
+                Manage Plan
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
-
-    <ul className="mt-6 space-y-2">
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> 5 Course Generate </span>
-      </li>
-
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Limited Support </span>
-      </li>
-
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Email support </span>
-      </li>
-
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Help center access </span>
-      </li>
-    </ul>
-
-    <Button variant="ghost" className="w-full mt-5 text-primary">
-        Current Plan
-        </Button>
-  </div>
-  <div className="rounded-2xl border border-gray-200 p-6 shadow-sm sm:px-8 lg:p-12">
-    <div className="text-center">
-      <h2 className="text-lg font-medium text-gray-900">
-        Montly
-        <span className="sr-only">Plan</span>
-      </h2>
-
-      <p className="mt-2 sm:mt-4">
-        <strong className="text-3xl font-bold text-gray-900 sm:text-4xl"> 9.99$ </strong>
-
-        <span className="text-sm font-medium text-gray-700">/Montly</span>
-      </p>
-    </div>
-
-    <ul className="mt-6 space-y-2">
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Unlimted Course Generate </span>
-      </li>
-
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Unlimted Flashcard, Quiz </span>
-      </li>
-
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Email support </span>
-      </li>
-
-      <li className="flex items-center gap-1">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="size-5 text-indigo-700"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-
-        <span className="text-gray-700"> Help center access </span>
-      </li>
-    </ul>
-
-   {userDetail?.isMember==false? <Button
-      onClick={OnCheckoutClick}
-      className="w-full mt-5"
-    >
-      Get Started
-    </Button>:
-
-<Button
-onClick={onPaymentMange}
-className="w-full mt-5"
->
-Manage Payment
-</Button>}
- 
-  </div>
-</div>
-</div></div>
   )
 }
 

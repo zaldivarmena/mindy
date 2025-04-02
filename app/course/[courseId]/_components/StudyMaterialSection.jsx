@@ -31,11 +31,11 @@ function StudyMaterialSection({courseId,course}) {
             type:'quiz'
         },
         {
-            name:'Question/Answer',
-            desc:'Help to pratice your learning',
-            icon:'/qa.png',
-            path:'/qa',
-            type:'qa'
+            name:'Mind Map',
+            desc:'Help to practice your learning',
+            icon:'/mindmap.png',
+            path:'/mindmap',
+            type:'mindmap'
         }
     ]
 
