@@ -33,8 +33,8 @@ function SelectOption({selectedStudyType}) {
             {Options.map((option,index)=>(
                 <div key={index} 
                 className={`p-4 flex flex-col items-center justify-center 
-                border rounded-xl hover:border-2 hover:border-primary cursor-pointer font-bold ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-100
-                ${option?.name==selectedOption&&'border-primary bg-primary text-white'}`}
+                border rounded-xl hover:bg-secondary cursor-pointer font-bold ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-100
+                ${option?.name==selectedOption&&'bg-primary text-white'}`}
                 onClick={()=>{setSelectedOption(option.name);selectedStudyType(option.name)}}
                 >
                     <Image src={option.icon} alt={option.name} width={50} height={50} />

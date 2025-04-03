@@ -83,38 +83,106 @@ export const GenerateNotes=inngest.createFunction(
     }
 )
 
+// Function to generate study type content (Flashcards, MindMap, Quiz)
+export const GenerateStudyTypeContent = inngest.createFunction(
+    { id: 'generate-study-type-content', retries: 1 },
+    { event: 'studyType.content' },
+    async ({ event, step }) => {
+        const { studyType, prompt, courseId, recordId } = event.data;
 
-// Used to generate Flashcard, Quiz, Question Answer
-export const GenerateStudyTypeContent=inngest.createFunction(
-    {id:'Generate Study Type Content',retries:1},
-    {event:'studyType.content'},
-
-    async({event,step})=>{
-        const {studyType,prompt,courseId,recordId}=event.data;
-
-        const AiResult= await step.run('Generating Flashcard using AI',async()=>{
-            const result= 
-            studyType=='Flashcard'?
-            await GenerateStudyTypeContentAiModel.sendMessage(prompt):
-            await GenerateQuizAiModel.sendMessage(prompt);
-            const AIResult= JSON.parse(result.response.text());
-            return AIResult
-        })
-
-        // Save the Result
-
-        const DbResult=await step.run('Save Result to DB',async()=>{
-            const result=await db.update(STUDY_TYPE_CONTENT_TABLE)
-            .set({
-                content:AiResult,
-                status:'Ready'
-            }).where(eq(STUDY_TYPE_CONTENT_TABLE.id,recordId))
+        // Generate content using AI
+        const contentResult = await step.run('Generate Content with AI', async () => {
+            console.log(`Generating ${studyType} content with prompt: ${prompt}`);
             
+            // Use the AI model to generate content
+            const result = await GenerateStudyTypeContentAiModel.sendMessage(prompt);
+            const aiResp = result.response.text();
+            
+            console.log(`AI response for ${studyType}:`, aiResp);
+            
+            // Parse the AI response as JSON
+            let content;
+            try {
+                // Try to parse the response as JSON
+                // Remove any markdown code blocks if present
+                const cleanedResponse = aiResp.replace(/```json\n|```\n|```json|```/g, '');
+                content = JSON.parse(cleanedResponse);
+                
+                // For MindMap, ensure it has the expected structure
+                if (studyType === 'MindMap') {
+                    // If the content is missing nodes or connections, add default ones
+                    if (!content.nodes || !Array.isArray(content.nodes) || content.nodes.length === 0) {
+                        content = {
+                            nodes: [
+                                {
+                                    id: "1",
+                                    label: "Main Topic",
+                                    type: "main"
+                                },
+                                {
+                                    id: "2",
+                                    label: "Subtopic 1",
+                                    type: "primary"
+                                }
+                            ],
+                            connections: [
+                                {
+                                    source: "1",
+                                    target: "2"
+                                }
+                            ]
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error('Error parsing AI response as JSON:', error);
+                // If parsing fails, create a default structure based on study type
+                if (studyType === 'MindMap') {
+                    content = {
+                        nodes: [
+                            {
+                                id: "1",
+                                label: "Main Topic",
+                                type: "main"
+                            },
+                            {
+                                id: "2",
+                                label: "Subtopic 1",
+                                type: "primary"
+                            }
+                        ],
+                        connections: [
+                            {
+                                source: "1",
+                                target: "2"
+                            }
+                        ]
+                    };
+                } else {
+                    // Generic fallback for other study types
+                    content = { 
+                        error: "Failed to parse AI response",
+                        rawContent: aiResp 
+                    };
+                }
+            }
+            
+            return content;
+        });
 
-            return 'Data Instered'
-        })
+        // Update the record in the database
+        const updateResult = await step.run('Update Study Type Content', async () => {
+            const result = await db.update(STUDY_TYPE_CONTENT_TABLE)
+                .set({
+                    content: JSON.stringify(contentResult),
+                    status: 'Ready'
+                })
+                .where(eq(STUDY_TYPE_CONTENT_TABLE.id, recordId));
+            
+            return 'Success';
+        });
+
+        return { success: true, studyType, courseId };
     }
-
-)
-
+);
 

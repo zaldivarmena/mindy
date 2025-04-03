@@ -2,6 +2,9 @@
 import axios from 'axios';
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 import {
     Carousel,
@@ -74,6 +77,14 @@ function Flashcards() {
   <CarouselNext />
 </Carousel>
 
+        </div>
+        <div className="mt-8 flex justify-center">
+          <Link href={`/course/${courseId}`}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Course
+            </Button>
+          </Link>
         </div>
 
   

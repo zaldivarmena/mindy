@@ -33,11 +33,19 @@ export async function POST(req) {
         return NextResponse.json(notes);
     }
     else {
-        const result=await db.select().from(STUDY_TYPE_CONTENT_TABLE)
-        .where(and( eq(STUDY_TYPE_CONTENT_TABLE?.courseId,courseId),
-        eq(STUDY_TYPE_CONTENT_TABLE.type,studyType)))
+        const result = await db.select().from(STUDY_TYPE_CONTENT_TABLE)
+            .where(and(
+                eq(STUDY_TYPE_CONTENT_TABLE?.courseId, courseId),
+                eq(STUDY_TYPE_CONTENT_TABLE.type, studyType)
+            ));
 
-        return NextResponse.json(result[0]??[]);
+        console.log(`Study type ${studyType} data:`, result[0]);
+        
+        if (!result || result.length === 0) {
+            return NextResponse.json({ content: null });
+        }
+        
+        return NextResponse.json(result[0]);
     }
     
 }

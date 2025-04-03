@@ -19,10 +19,15 @@ function MaterialCardItem({item,studyTypeContent,course,refreshData}) {
       chapters=(chapter.chapter_title||chapter.chapterTitle)+','+chapters
     });
   
+    // Use the correct type format for the API
+    // The API expects 'MindMap' not 'Mind Map'
     const result=await axios.post('/api/study-type-content',{
       courseId:course?.courseId,
-      type:item.name,
-      chapters:chapters
+      type:item.type === 'mindmap' ? 'MindMap' : 
+           item.type === 'flashcard' ? 'Flashcard' : 
+           item.type === 'quiz' ? 'Quiz' : item.name,
+      chapters:chapters,
+      courseLength: course?.courseLayout?.chapters?.length || 5
     });
 
     setLoading(false);
