@@ -35,9 +35,26 @@ function MindMapNode({ data, selected }) {
     return 'shadow-md';
   };
 
+  // Determine node size based on type and screen size
+  const getNodeSize = () => {
+    const isMobile = window.innerWidth < 768;
+    
+    switch (data.type) {
+      case 'main':
+        return isMobile ? 'min-w-[120px] max-w-[200px]' : 'min-w-[180px] max-w-[300px]';
+      case 'primary':
+        return isMobile ? 'min-w-[100px] max-w-[180px]' : 'min-w-[150px] max-w-[250px]';
+      case 'secondary':
+      case 'tertiary':
+        return isMobile ? 'min-w-[80px] max-w-[150px]' : 'min-w-[120px] max-w-[200px]';
+      default:
+        return isMobile ? 'min-w-[80px] max-w-[150px]' : 'min-w-[120px] max-w-[200px]';
+    }
+  };
+
   return (
     <div 
-      className={`px-4 py-3 rounded-lg ${getShadowStyle()} ${getBorderStyle()} min-w-[150px] max-w-[300px] ${getNodeColor()} text-white transition-all duration-200 ease-in-out ${isHovered ? 'scale-105' : 'scale-100'}`}
+      className={`px-2 sm:px-4 py-2 sm:py-3 rounded-lg ${getShadowStyle()} ${getBorderStyle()} ${getNodeSize()} ${getNodeColor()} text-white transition-all duration-200 ease-in-out ${isHovered ? 'scale-105' : 'scale-100'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -49,10 +66,10 @@ function MindMapNode({ data, selected }) {
       />
       
       {/* Node content */}
-      <div className="font-medium text-center mb-1 break-words">{data.label}</div>
+      <div className="font-medium text-xs sm:text-sm md:text-base text-center mb-1 break-words">{data.label}</div>
       {data.description && (
-        <div className="text-xs mt-1 text-white/90 overflow-auto max-h-24 break-words">
-          {data.description}
+        <div className="text-[10px] sm:text-xs mt-1 text-white/90 overflow-auto max-h-12 sm:max-h-24 break-words">
+          {data.type === 'main' || window.innerWidth >= 768 ? data.description : data.description.length > 50 ? `${data.description.substring(0, 50)}...` : data.description}
         </div>
       )}
       

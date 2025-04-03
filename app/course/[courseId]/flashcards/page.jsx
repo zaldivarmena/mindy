@@ -53,35 +53,46 @@ function Flashcards() {
     }
     
   return (
-    <div>
-        <h2 className='font-bold text-2xl'>Flashcards</h2>
-        <p>Flashcards: The Ultimate Tool to Lock in Concepts!</p>
+    <div className="px-2 sm:px-4 md:px-6">
+        <h2 className='font-bold text-xl sm:text-2xl'>Flashcards</h2>
+        <p className="text-sm sm:text-base">Flashcards: The Ultimate Tool to Lock in Concepts!</p>
 
-        <div className=' mt-10'>
+        <div className='mt-6 sm:mt-10'>
         {/* <StepProgress data={flashCards?.content} 
         setStepCount={(v)=>setStepCount(v)} 
         stepCount={stepCount} /> */}
 
-        <Carousel setApi={setApi}>
+        <Carousel setApi={setApi} className="w-full">
         <CarouselContent>
-            {flashCards?.content&&flashCards.content?.map((flashcard,index)=>(
+            {flashCards?.content && flashCards.content?.length > 0 ? (
+              flashCards.content.map((flashcard, index) => (
                 <CarouselItem key={index} className="flex items-center justify-center">
-                <FlashcardItem handleClick={handleClick} 
-                isFlipped={isFlipped}
-                flashcard={flashcard}/>
+                  <FlashcardItem 
+                    handleClick={handleClick} 
+                    isFlipped={isFlipped}
+                    flashcard={flashcard}
+                  />
                 </CarouselItem>
-            ))}
-
+              ))
+            ) : (
+              <CarouselItem className="flex items-center justify-center h-[200px] sm:h-[250px] md:h-[350px]">
+                <div className="text-center p-4 bg-gray-100 rounded-lg shadow-md">
+                  <p>No flashcards available for this course.</p>
+                </div>
+              </CarouselItem>
+            )}
         </CarouselContent>
-  <CarouselPrevious />
-  <CarouselNext />
-</Carousel>
+        <div className="flex justify-center mt-4 gap-2">
+          <CarouselPrevious className="relative left-0 translate-x-0 sm:absolute" />
+          <CarouselNext className="relative right-0 translate-x-0 sm:absolute" />
+        </div>
+      </Carousel>
 
         </div>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-6 sm:mt-8 flex justify-center">
           <Link href={`/course/${courseId}`}>
-            <Button variant="outline" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="outline" className="flex items-center gap-2 text-sm sm:text-base">
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               Back to Course
             </Button>
           </Link>

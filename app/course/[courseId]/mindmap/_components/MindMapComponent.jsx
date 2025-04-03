@@ -111,20 +111,107 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
         }
       }
       
-      // Transform nodes to React Flow format
-      const flowNodes = nodeData.map((node, index) => ({
-        id: node.id?.toString() || (index + 1).toString(),
-        type: 'mindMapNode',
-        position: { 
+      // Determine node types and relationships for better positioning
+      const nodeTypes = {};
+      const childrenByParent = {};
+      
+      // First pass: identify node types and parent-child relationships
+      connectionData.forEach(conn => {
+        const sourceId = conn.source?.toString() || conn.from?.toString();
+        const targetId = conn.target?.toString() || conn.to?.toString();
+        
+        if (!childrenByParent[sourceId]) {
+          childrenByParent[sourceId] = [];
+        }
+        childrenByParent[sourceId].push(targetId);
+      });
+      
+      // Find the root node (usually has most children and no parents)
+      let rootId = '1';
+      let maxChildren = 0;
+      
+      Object.keys(childrenByParent).forEach(parentId => {
+        if (childrenByParent[parentId].length > maxChildren) {
+          maxChildren = childrenByParent[parentId].length;
+          rootId = parentId;
+        }
+      });
+      
+      // Assign node types based on hierarchy
+      nodeData.forEach(node => {
+        const id = node.id?.toString() || '1';
+        if (id === rootId) {
+          nodeTypes[id] = 'main';
+        } else if (childrenByParent[rootId]?.includes(id)) {
+          nodeTypes[id] = 'primary';
+        } else {
+          nodeTypes[id] = 'secondary';
+        }
+      });
+      
+      // Calculate better positions based on hierarchy
+      const calculateNodePositions = () => {
+        const centerX = window.innerWidth < 768 ? 150 : 400;
+        const centerY = 300;
+        const primaryRadius = window.innerWidth < 768 ? 150 : 250;
+        const secondaryRadius = window.innerWidth < 768 ? 250 : 400;
+        
+        const positions = {};
+        
+        // Position the main node at center
+        positions[rootId] = { x: centerX, y: centerY };
+        
+        // Position primary nodes in a circle around the main node
+        const primaryNodes = childrenByParent[rootId] || [];
+        primaryNodes.forEach((nodeId, index) => {
+          const angle = (index * (2 * Math.PI / primaryNodes.length));
+          positions[nodeId] = {
+            x: centerX + Math.cos(angle) * primaryRadius,
+            y: centerY + Math.sin(angle) * primaryRadius
+          };
+        });
+        
+        // Position secondary nodes around their primary parents
+        primaryNodes.forEach((primaryId) => {
+          const secondaryNodes = childrenByParent[primaryId] || [];
+          const primaryPos = positions[primaryId];
+          
+          secondaryNodes.forEach((nodeId, index) => {
+            const angle = (index * (2 * Math.PI / secondaryNodes.length));
+            const offsetX = Math.cos(angle) * (secondaryRadius / 2);
+            const offsetY = Math.sin(angle) * (secondaryRadius / 2);
+            
+            positions[nodeId] = {
+              x: primaryPos.x + offsetX,
+              y: primaryPos.y + offsetY
+            };
+          });
+        });
+        
+        return positions;
+      };
+      
+      const nodePositions = calculateNodePositions();
+      
+      // Transform nodes to React Flow format with improved positioning
+      const flowNodes = nodeData.map((node, index) => {
+        const id = node.id?.toString() || (index + 1).toString();
+        const position = nodePositions[id] || { 
           x: node.position?.x || (index === 0 ? 400 : Math.cos(index * 0.5) * 250 + 400), 
           y: node.position?.y || (index === 0 ? 300 : Math.sin(index * 0.5) * 250 + 300) 
-        },
-        data: { 
-          label: node.label || node.content || node.text || node.name || `Node ${index + 1}`,
-          description: node.description || node.details || node.info || '',
-          type: node.type || (index === 0 ? 'main' : index < 5 ? 'primary' : 'secondary')
-        },
-      }));
+        };
+        
+        return {
+          id: id,
+          type: 'mindMapNode',
+          position: position,
+          data: { 
+            label: node.label || node.content || node.text || node.name || `Node ${index + 1}`,
+            description: node.description || node.details || node.info || '',
+            type: node.type || nodeTypes[id] || (index === 0 ? 'main' : index < 5 ? 'primary' : 'secondary')
+          },
+        };
+      });
 
       // Transform connections to React Flow edges
       const flowEdges = connectionData.map((connection, index) => ({
@@ -416,7 +503,7 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
   }));
 
   return (
-    <div className="h-full w-full border rounded-lg relative">
+    <div className="h-full w-full border rounded-lg relative overflow-hidden">
       {isEditingNode && (
         <div className="absolute top-0 left-0 right-0 z-10 bg-white p-4 border-b shadow-md">
           <h3 className="font-medium mb-2">Edit Node</h3>
@@ -469,7 +556,10 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
           onNodeDoubleClick={onNodeDoubleClick}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={{ padding: 0.3 }}
+          minZoom={0.1}
+          maxZoom={2}
+          defaultZoom={0.8}
           defaultEdgeOptions={{ type: 'smoothstep', animated: false }}
           attributionPosition="bottom-right"
           onInit={setReactFlowInstance}

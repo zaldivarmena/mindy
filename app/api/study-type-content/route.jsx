@@ -9,7 +9,7 @@ export async function POST(req) {
     let PROMPT;
     
     if (type === 'Flashcard') {
-        PROMPT = 'Generate the flashcard on topic : ' + chapters + ' in JSON format with front back content, Maximum '+courseLength +' * 3 flashcards';
+        PROMPT = 'Generate the flashcard on topic : ' + chapters + ' in JSON format with front back content, Maximum ('+courseLength +' * 3) flashcards';
     } else if (type === 'MindMap') {
         PROMPT = `Generate a comprehensive hierarchical mind map on topic: ${chapters}. 
 

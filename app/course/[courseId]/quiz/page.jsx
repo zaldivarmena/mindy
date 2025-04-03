@@ -90,15 +90,15 @@ function Quiz() {
 
   return (
     <div className="p-4">
-        <div className="flex justify-between items-center mb-6">
-            <Link href={`/course/${courseId}`}>
-                <button className="flex items-center gap-2 px-4 py-2 border rounded hover:bg-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <Link href={`/course/${courseId}`} className="w-full sm:w-auto">
+                <button className="flex items-center justify-center gap-2 px-4 py-2 border rounded hover:bg-gray-100 w-full sm:w-auto">
                     <ArrowLeft className="h-4 w-4" />
                     Back to Course
                 </button>
             </Link>
-            <h2 className='font-bold text-2xl'>Quiz</h2>
-            <div className="w-[120px]"></div> {/* Empty div for balance */}
+            <h2 className='font-bold text-xl sm:text-2xl'>Quiz</h2>
+            <div className="hidden sm:block w-[120px]"></div> {/* Empty div for balance on larger screens */}
         </div>
 
         <StepProgress data={quiz} stepCount={stepCount} setStepCount={(value)=>setStepCount(value)} />
@@ -118,23 +118,23 @@ function Quiz() {
             )}
         </div>
 
-        {isCorrectAns==false && quiz && quiz.length > 0 && stepCount < quiz.length && <div>
+        {isCorrectAns==false && quiz && quiz.length > 0 && stepCount < quiz.length && <div className="mt-4">
             <div className='border p-3 border-red-700 bg-red-200 rounded-lg'>
                 <h2 className='font-bold text-lg text-red-600'>Incorrect</h2>
-                <p className='text-red-600'>Correct Answer is: {quiz[stepCount]?.answer || correctAns}</p>
+                <p className='text-red-600 break-words'>Correct Answer is: {quiz[stepCount]?.answer || correctAns}</p>
             </div>
         </div>}
        
-        {isCorrectAns==true && <div>
+        {isCorrectAns==true && <div className="mt-4">
             <div className='border p-3 border-green-700 bg-green-100 rounded-lg'>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h2 className='font-bold text-lg text-green-600'>Correct!</h2>
                         <p className='text-green-600'>Your answer is correct!</p>
                     </div>
                     <button 
                         onClick={() => setStepCount(stepCount + 1)}
-                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        className="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                     >
                         Next Question
                     </button>
@@ -143,27 +143,27 @@ function Quiz() {
         </div>}
    
         {isFinished && (
-            <div className="mt-8 p-6 border rounded-lg bg-blue-50 text-center">
-                <h2 className="text-2xl font-bold mb-4">Quiz Completed!</h2>
-                <div className="text-4xl font-bold mb-6 text-blue-600">
+            <div className="mt-8 p-4 sm:p-6 border rounded-lg bg-blue-50 text-center">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Quiz Completed!</h2>
+                <div className="text-3xl sm:text-4xl font-bold mb-6 text-blue-600">
                     {score} / {quiz.length}
                 </div>
-                <p className="mb-6 text-lg">
+                <p className="mb-6 text-base sm:text-lg">
                     {score === quiz.length ? 
                         "Perfect score! Excellent work!" : 
                         score >= quiz.length * 0.7 ? 
                             "Great job! You've mastered most of the content." :
                             "Keep practicing! You'll improve with time."}
                 </p>
-                <div className="flex justify-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
                     <button 
                         onClick={restartQuiz}
                         className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Retake Quiz
                     </button>
-                    <Link href={`/course/${courseId}`}>
-                        <button className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    <Link href={`/course/${courseId}`} className="w-full sm:w-auto">
+                        <button className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                             Back to Course
                         </button>
                     </Link>

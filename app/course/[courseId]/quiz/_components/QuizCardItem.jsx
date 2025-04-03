@@ -9,9 +9,9 @@ function QuizCardItem({quiz, userSelectedOption, userAnswer, blocked}) {
     <div className='mt-10 p-5'>
         {quiz ? (
             <>
-                <h2 className='font-medium text-3xl text-center'>{quiz.question}</h2>
+                <h2 className='font-medium text-xl sm:text-2xl md:text-3xl text-center mb-4'>{quiz.question}</h2>
 
-                <div className='grid grid-cols-2 gap-5 mt-6'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-6'>
                     {Array.isArray(quiz.options) && quiz.options.map((option, index) => (
                         <h2 
                             onClick={() => {
@@ -22,7 +22,7 @@ function QuizCardItem({quiz, userSelectedOption, userAnswer, blocked}) {
                             key={index} 
                             variant="outline"
                             className={`w-full border rounded-full p-3 px-4 text-center
-                            text-lg ${!blocked ? 'hover:bg-gray-200 cursor-pointer' : 'cursor-default'}
+                            text-sm sm:text-base md:text-lg ${!blocked ? 'hover:bg-gray-200 cursor-pointer' : 'cursor-default'}
                             ${selectedOption==option ? 'bg-primary text-white hover:bg-primary' : ''}
                             ${blocked && option === quiz?.answer ? 'bg-green-500 text-white' : ''}
                             ${blocked && selectedOption==option && option !== quiz?.answer ? 'bg-red-500 text-white' : ''}`}
