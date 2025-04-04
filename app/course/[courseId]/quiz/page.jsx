@@ -111,11 +111,14 @@ function Quiz() {
                     userAnswer={userAnswers[quiz[stepCount]?.id || stepCount]}
                     blocked={userAnswers[quiz[stepCount]?.id || stepCount] !== undefined || isCorrectAns !== null}
                 />
-            ) : (
+            ) : !isFinished ? (
                 <div className="p-4 border rounded-lg text-center">
-                    <p>Loading quiz questions or no questions available...</p>
+                    <div className="flex flex-col items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                        <p className="text-gray-600 font-medium">Loading quiz questions...</p>
+                    </div>
                 </div>
-            )}
+            ) : null}
         </div>
 
         {isCorrectAns==false && quiz && quiz.length > 0 && stepCount < quiz.length && <div className="mt-4">
@@ -144,17 +147,9 @@ function Quiz() {
    
         {isFinished && (
             <div className="mt-8 p-4 sm:p-6 border rounded-lg bg-blue-50 text-center">
-                <h2 className="text-xl sm:text-2xl font-bold mb-4">Quiz Completed!</h2>
                 <div className="text-3xl sm:text-4xl font-bold mb-6 text-blue-600">
                     {score} / {quiz.length}
                 </div>
-                <p className="mb-6 text-base sm:text-lg">
-                    {score === quiz.length ? 
-                        "Perfect score! Excellent work!" : 
-                        score >= quiz.length * 0.7 ? 
-                            "Great job! You've mastered most of the content." :
-                            "Keep practicing! You'll improve with time."}
-                </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                     <button 
                         onClick={restartQuiz}

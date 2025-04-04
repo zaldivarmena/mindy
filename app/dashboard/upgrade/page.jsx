@@ -122,15 +122,15 @@ function Upgrade() {
 
             {userDetail?.isMember === false ? (
               <Button 
-                variant="outline" 
-                onClick={onPaymentMange} 
+                variant="ghost" 
                 className="w-full"
+                disabled
               >
-                Manage Plan
+                Current Plan
               </Button>
             ) : (
               <Button
-                onClick={OnCheckoutClick}
+                onClick={onPaymentMange}
                 variant="outline"
                 className="w-full"
               >

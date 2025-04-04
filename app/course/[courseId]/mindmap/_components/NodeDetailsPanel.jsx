@@ -1,9 +1,9 @@
 "use client"
 import React from 'react';
-import { Edit, X } from 'lucide-react';
+import { Edit, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-function NodeDetailsPanel({ node, onClose, onEdit }) {
+function NodeDetailsPanel({ node, onClose, onEdit, onDelete, editMode }) {
   if (!node) return null;
 
   return (
@@ -11,9 +11,31 @@ function NodeDetailsPanel({ node, onClose, onEdit }) {
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-lg">Node Details</h3>
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={onEdit} title="Edit node">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onEdit} 
+            title="Edit node"
+            disabled={!editMode}
+            className={!editMode ? 'opacity-50 cursor-not-allowed' : ''}
+          >
             <Edit className="h-4 w-4" />
           </Button>
+          {editMode && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                if (window.confirm(`Delete this node and all its children?`)) {
+                  onDelete(node.id);
+                }
+              }} 
+              title="Delete node and all children"
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={onClose} title="Close panel">
             <X className="h-4 w-4" />
           </Button>

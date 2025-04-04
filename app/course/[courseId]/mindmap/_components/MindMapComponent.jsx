@@ -149,44 +149,140 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
         }
       });
       
-      // Calculate better positions based on hierarchy
+      // Calculate positions based on vertical tree distribution
       const calculateNodePositions = () => {
-        const centerX = window.innerWidth < 768 ? 150 : 400;
-        const centerY = 300;
-        const primaryRadius = window.innerWidth < 768 ? 150 : 250;
-        const secondaryRadius = window.innerWidth < 768 ? 250 : 400;
+        // Use viewport dimensions for responsive positioning
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Adjust center position based on viewport
+        const centerX = Math.max(400, viewportWidth / 2);
+        const topY = 100; // Start from top
+        
+        // Spacing constants - increased for better separation
+        const levelHeight = 200; // Increased vertical space between levels
+        const horizontalSpacing = 250; // Increased horizontal space between nodes
+        const minNodeDistance = 180; // Minimum distance between any two nodes
         
         const positions = {};
+        const levelWidths = {}; // Store width needed for each level
+        const nodesPerLevel = {}; // Count nodes per level
+        const nodesByLevel = {}; // Store nodes by level for collision detection
         
-        // Position the main node at center
-        positions[rootId] = { x: centerX, y: centerY };
-        
-        // Position primary nodes in a circle around the main node
-        const primaryNodes = childrenByParent[rootId] || [];
-        primaryNodes.forEach((nodeId, index) => {
-          const angle = (index * (2 * Math.PI / primaryNodes.length));
-          positions[nodeId] = {
-            x: centerX + Math.cos(angle) * primaryRadius,
-            y: centerY + Math.sin(angle) * primaryRadius
-          };
-        });
-        
-        // Position secondary nodes around their primary parents
-        primaryNodes.forEach((primaryId) => {
-          const secondaryNodes = childrenByParent[primaryId] || [];
-          const primaryPos = positions[primaryId];
+        // First pass: determine how many nodes are on each level
+        const countNodesPerLevel = (nodeId, level = 0) => {
+          if (!nodesPerLevel[level]) {
+            nodesPerLevel[level] = 0;
+            nodesByLevel[level] = [];
+          }
+          nodesPerLevel[level]++;
+          nodesByLevel[level].push(nodeId);
           
-          secondaryNodes.forEach((nodeId, index) => {
-            const angle = (index * (2 * Math.PI / secondaryNodes.length));
-            const offsetX = Math.cos(angle) * (secondaryRadius / 2);
-            const offsetY = Math.sin(angle) * (secondaryRadius / 2);
-            
-            positions[nodeId] = {
-              x: primaryPos.x + offsetX,
-              y: primaryPos.y + offsetY
-            };
-          });
+          const children = childrenByParent[nodeId] || [];
+          children.forEach(childId => countNodesPerLevel(childId, level + 1));
+        };
+        
+        // Start counting from root
+        countNodesPerLevel(rootId);
+        
+        // Calculate width needed for each level - ensure enough space
+        Object.keys(nodesPerLevel).forEach(level => {
+          const nodesInLevel = nodesPerLevel[level];
+          // Ensure we have enough width even for levels with few nodes
+          levelWidths[level] = Math.max(nodesInLevel * horizontalSpacing, viewportWidth * 0.8);
         });
+        
+        // Check if a position would cause overlap with existing nodes
+        const wouldOverlap = (x, y, level, nodeId) => {
+          const existingNodesAtLevel = nodesByLevel[level] || [];
+          for (const existingNodeId of existingNodesAtLevel) {
+            if (existingNodeId === nodeId || !positions[existingNodeId]) continue;
+            
+            const existingX = positions[existingNodeId].x;
+            const existingY = positions[existingNodeId].y;
+            
+            // Calculate distance between nodes
+            const distance = Math.sqrt(Math.pow(existingX - x, 2) + Math.pow(existingY - y, 2));
+            
+            if (distance < minNodeDistance) {
+              return true; // Would overlap
+            }
+          }
+          return false; // No overlap
+        };
+        
+        // Find a non-overlapping position for a node
+        const findNonOverlappingPosition = (baseX, baseY, level, nodeId) => {
+          let x = baseX;
+          let y = baseY;
+          
+          // If no overlap, return the original position
+          if (!wouldOverlap(x, y, level, nodeId)) {
+            return { x, y };
+          }
+          
+          // Try positions with increasing offsets until we find a non-overlapping one
+          let offset = horizontalSpacing / 2;
+          let direction = 1; // 1 for right, -1 for left
+          
+          for (let attempts = 0; attempts < 20; attempts++) { // Limit attempts to prevent infinite loops
+            x = baseX + (offset * direction);
+            
+            if (!wouldOverlap(x, y, level, nodeId)) {
+              return { x, y };
+            }
+            
+            // Alternate directions and increase offset
+            direction *= -1;
+            if (direction === 1) {
+              offset += horizontalSpacing / 2;
+            }
+          }
+          
+          // If we couldn't find a non-overlapping position, return the original with a small random offset
+          return { 
+            x: baseX + (Math.random() - 0.5) * horizontalSpacing, 
+            y: baseY 
+          };
+        };
+        
+        // Second pass: position nodes with collision avoidance
+        const positionNodes = (nodeId, level = 0, horizontalIndex = 0, totalNodesInLevel = nodesPerLevel[level]) => {
+          // Calculate horizontal position to center nodes in their level
+          const levelWidth = levelWidths[level];
+          const startX = centerX - (levelWidth / 2) + (horizontalSpacing / 2);
+          const baseX = startX + (horizontalIndex * horizontalSpacing);
+          const baseY = topY + (level * levelHeight);
+          
+          // Find a position that doesn't overlap with existing nodes
+          const { x, y } = findNonOverlappingPosition(baseX, baseY, level, nodeId);
+          positions[nodeId] = { x, y };
+          
+          // Position children
+          const children = childrenByParent[nodeId] || [];
+          const childLevel = level + 1;
+          
+          if (children.length === 0) return horizontalIndex + 1;
+          
+          // Calculate starting index for children to center them under parent
+          let childStartIndex = 0;
+          if (nodesPerLevel[childLevel]) {
+            // Find the right starting position to center children under parent
+            const totalChildrenWidth = children.length * horizontalSpacing;
+            const childrenStartX = x - (totalChildrenWidth / 2) + (horizontalSpacing / 2);
+            childStartIndex = Math.max(0, Math.round((childrenStartX - startX) / horizontalSpacing));
+          }
+          
+          // Position each child, ensuring they're below the parent
+          children.forEach((childId, index) => {
+            positionNodes(childId, childLevel, childStartIndex + index, nodesPerLevel[childLevel]);
+          });
+          
+          return horizontalIndex + 1;
+        };
+        
+        // Start positioning from root
+        positionNodes(rootId);
         
         return positions;
       };
@@ -323,6 +419,7 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
   const [nodeToEdit, setNodeToEdit] = useState(null);
   const [editLabel, setEditLabel] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editMode, setEditMode] = useState(false);
   
   // Export mind map as image using html-to-image
   const exportAsPng = useCallback(() => {
@@ -378,11 +475,13 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
   
   // Handle node double click to edit
   const onNodeDoubleClick = useCallback((event, node) => {
-    setNodeToEdit(node);
-    setEditLabel(node.data.label);
-    setEditDescription(node.data.description || '');
-    setIsEditingNode(true);
-  }, []);
+    if (editMode) {
+      setNodeToEdit(node);
+      setEditLabel(node.data.label);
+      setEditDescription(node.data.description || '');
+      setIsEditingNode(true);
+    }
+  }, [editMode]);
   
   // Save node edits
   const saveNodeEdits = useCallback(() => {
@@ -412,8 +511,12 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
   
   // Add a new node connected to the selected node
   const addChildNode = useCallback(() => {
-    if (!selectedNode) {
-      toast.error("Please select a parent node first");
+    if (!selectedNode || !editMode) {
+      if (!editMode) {
+        toast.info("Enable edit mode to add nodes");
+      } else {
+        toast.error("Please select a parent node first");
+      }
       return;
     }
     
@@ -428,19 +531,35 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
       nodeType = 'primary';
     }
     
-    // Calculate position offset from parent
+    // Calculate position offset from parent - vertical tree layout
     const parentX = selectedNode.position.x;
     const parentY = selectedNode.position.y;
-    const offset = 150;
-    const angle = Math.random() * Math.PI * 2; // Random angle
     
-    // Create the new node
+    // For vertical tree layout, position directly below parent
+    // with sufficient spacing to avoid overlapping
+    const verticalOffset = 200; // Increased vertical distance for better separation
+    
+    // Find existing child nodes of the selected parent
+    const existingChildEdges = edges.filter(edge => edge.source === selectedNode.id);
+    const childCount = existingChildEdges.length;
+    
+    // Determine horizontal position based on number of existing children
+    // Center the new node if it's the first child, otherwise position to the side
+    let horizontalOffset = 0;
+    if (childCount > 0) {
+      // Alternate left and right with increasing distance
+      const direction = childCount % 2 === 0 ? 1 : -1;
+      const distance = Math.ceil(childCount / 2) * 100;
+      horizontalOffset = direction * distance;
+    }
+    
+    // Create the new node with vertical tree positioning
     const newNode = {
       id: newNodeId,
       type: 'mindMapNode',
       position: {
-        x: parentX + Math.cos(angle) * offset,
-        y: parentY + Math.sin(angle) * offset
+        x: parentX + horizontalOffset,
+        y: parentY + verticalOffset,
       },
       data: {
         label: 'New Node',
@@ -495,11 +614,54 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
     return <div className="flex items-center justify-center h-full">No mind map data available</div>;
   }
 
+  // Function to delete a node and all its child nodes recursively
+  const deleteNodeAndChildren = useCallback((nodeId) => {
+    if (!editMode) {
+      toast.info("Enable edit mode to delete nodes");
+      return;
+    }
+
+    // Find all descendant nodes recursively
+    const findAllDescendants = (parentId, descendants = []) => {
+      // Find direct children
+      const childEdges = edges.filter(edge => edge.source === parentId);
+      const childIds = childEdges.map(edge => edge.target);
+      
+      // Add children to descendants
+      descendants.push(...childIds);
+      
+      // Recursively find descendants of each child
+      childIds.forEach(childId => {
+        findAllDescendants(childId, descendants);
+      });
+      
+      return descendants;
+    };
+    
+    // Get all descendants of the node
+    const descendants = findAllDescendants(nodeId);
+    const nodesToDelete = [nodeId, ...descendants];
+    
+    // Delete all edges connected to these nodes
+    setEdges(eds => eds.filter(edge => 
+      !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
+    ));
+    
+    // Delete the nodes
+    setNodes(nds => nds.filter(node => !nodesToDelete.includes(node.id)));
+    
+    // Close the details panel
+    closeNodeDetails();
+    
+    toast.success(`Deleted node and ${descendants.length} child node${descendants.length !== 1 ? 's' : ''}`);
+  }, [edges, setEdges, setNodes, editMode, closeNodeDetails]);
+
   // Expose functions to the parent component via ref
   React.useImperativeHandle(ref, () => ({
     exportAsPng,
     addChildNode,
-    saveNodeEdits
+    saveNodeEdits,
+    deleteNodeAndChildren
   }));
 
   return (
@@ -556,15 +718,13 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
           onNodeDoubleClick={onNodeDoubleClick}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.3 }}
+          fitViewOptions={{ padding: 0.5 }}
           minZoom={0.1}
           maxZoom={2}
-          defaultZoom={0.8}
+          defaultZoom={0.7}
           defaultEdgeOptions={{ type: 'smoothstep', animated: false }}
           attributionPosition="bottom-right"
           onInit={setReactFlowInstance}
-          minZoom={0.1}
-          maxZoom={2}
         >
         <Controls />
         <MiniMap 
@@ -589,9 +749,19 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
             <Button 
               variant="outline" 
               size="sm" 
+              className={`${editMode ? 'bg-blue-100 text-blue-700' : 'bg-white'} hover:bg-blue-50`}
+              onClick={() => setEditMode(!editMode)}
+              title={editMode ? "Disable editing" : "Enable editing"}
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              {editMode ? "Editing On" : "Edit Map"}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
               className="bg-white hover:bg-green-50"
               onClick={addChildNode}
-              disabled={!selectedNode}
+              disabled={!selectedNode || !editMode}
               title="Add child node"
             >
               <Plus className="h-4 w-4 mr-1" />
@@ -617,11 +787,17 @@ const MindMapComponent = React.forwardRef(({ data }, ref) => {
           node={selectedNode} 
           onClose={closeNodeDetails} 
           onEdit={() => {
-            setNodeToEdit(selectedNode);
-            setEditLabel(selectedNode.data.label);
-            setEditDescription(selectedNode.data.description || '');
-            setIsEditingNode(true);
+            if (editMode) {
+              setNodeToEdit(selectedNode);
+              setEditLabel(selectedNode.data.label);
+              setEditDescription(selectedNode.data.description || '');
+              setIsEditingNode(true);
+            } else {
+              toast.info("Enable edit mode to modify nodes");
+            }
           }}
+          onDelete={deleteNodeAndChildren}
+          editMode={editMode}
         />
       )}
     </div>
